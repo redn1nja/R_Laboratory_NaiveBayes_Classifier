@@ -56,15 +56,15 @@ function where the solution is compared with a test version
 
 ##### Cons of the method:
 
-    1) Low speed
+    1) Relatively low speed of testing (10 messages/min), but it depends on the power of a machine
     2) ...
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### The method takes:
-     a csv file (train.csv) to calculate probabilities of each word in each message in it
-     a csv file (test.csv) to test the accuracy of the work
-     a txt file (stop_words.txt) with usual english stop words to clean messages for proper work
+- a csv file (train.csv) to calculate probabilities of each word in each message in it
+- a csv file (test.csv) to test the accuracy of the work
+- a txt file (stop_words.txt) with usual english stop words to clean messages for proper work
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
