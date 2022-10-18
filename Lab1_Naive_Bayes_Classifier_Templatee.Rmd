@@ -81,6 +81,7 @@ classifier works.
 # though you may install other ones if they are needed
 library(tidytext)
 library(readr)
+library(stringr)
 library(dplyr)
 library(ggplot2)
 ```
@@ -151,16 +152,13 @@ test <-  read.csv(file = test_path, stringsAsFactors = FALSE)
 tidy_text <- unnest_tokens(train, 'splitted', "Message", token="words") %>%
 filter(!splitted %in% splitted_stop_words)
 counters <- count(tidy_text, splitted, sort = TRUE)
-tidy_text %>% count(splitted,sort=TRUE)
 ham <- subset(tidy_text, Category == "ham") %>% count(splitted, sort = TRUE)
 spam <- subset(tidy_text, Category == "spam") %>% count(splitted, sort = TRUE)
 counters <- merge(counters, ham, by = "splitted", all = TRUE)
 colnames(counters)[3] = "ham_n"
 counters <- merge(counters, spam, by = "splitted", all = TRUE)
 colnames(counters)[4] = "spam_n"
-counters[, 3] + 1
-counters[, 4] + 1
-counters[is.na(counters)]<-1
+counters[is.na(counters)]<-0
 ham_num <- sum(counters$ham_n)
 spam_num <-sum(counters$spam_n)
 p_spam <- nrow(subset(train, Category == "spam"))/nrow(train)
@@ -193,7 +191,7 @@ naiveBayes <- setRefClass("naiveBayes",
     
     calculate_probabilies_spam = function(word){
       amount <- counters[counters$splitted == word, ]$spam
-      result <- (amount+1)/(spam_num+total_len)
+      result <- (amount+1)/( spam_num+total_len)
       return (result)
     },
     
@@ -220,7 +218,7 @@ naiveBayes <- setRefClass("naiveBayes",
     
     predict = function(message)
     {
-      spltmsg <- (strsplit(str_replace_all(message, "[[:punct:]]", ""), split = " "))[[1]]
+      spltmsg <- strsplit(message, split = " ")[[1]]
       result_ham <- p_ham
       result_spam <- p_spam
       vcalc_h <- Vectorize(naiveBayes()$calc_ham)
@@ -229,7 +227,7 @@ naiveBayes <- setRefClass("naiveBayes",
       hams <- prod(vcalc_h(spltmsg))
       result_spam <- result_spam * spams
       result_ham <- result_ham * hams
-      if(result_ham>0.001*result_spam){
+      if(result_ham>0.01*result_spam){
         print("ham")
         return ("ham")
       }
@@ -244,7 +242,8 @@ naiveBayes <- setRefClass("naiveBayes",
     {
       vpredict <- Vectorize(naiveBayes()$predict)
       for (x in X_test$Message){
-        X_test[X_test$Message == x, ]  <- x[!x %in% splitted_stop_words]
+        X_test[X_test$Message == x, ]$Message  <- x[!x %in% splitted_stop_words]
+        X_test[X_test$Message == x, ]$Message <- str_replace_all(x, "[[:punct:]]", "")
       }
       
       X_test$result_col <- vpredict(X_test$Message)
@@ -255,7 +254,7 @@ naiveBayes <- setRefClass("naiveBayes",
 
 model = naiveBayes()
 counters <- model$fit(counters)
-test<- model$score(test)
+test<- model$score(head(test))
 print(sum(test$match)/nrow(test))
 
 ```
