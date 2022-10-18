@@ -70,9 +70,7 @@ function where the solution is compared with a test version
 
 ## Examples of work:
 
-можливо добавити output з 20 повідомленнями
-
-та output з цілими файлами
+добавити output з цілими файлами
 
 показати випадки коли програма показала неправильне значення (HAM when SPAM or SPAM when HAM)
 
